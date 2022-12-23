@@ -1,0 +1,50 @@
+# rule spec
+
+# alert {ip|tcp|http|udp|icmp} {IP address|any} {Source port|any} -> {IP address|any} {Destination port|any} (msg:"message";options...)
+
+# rule options
+
+# content:"content";
+# regex:"regex";
+
+# if protocol == HTTP:
+#    method:{"GET"|"POST"|"PUT"|"PATCH"|"DELETE"}
+
+# IP rule
+
+alert ip 172.18.0.2 any -> 172.18.0.4 any (msg:"IP packet from ubuntu-2 to ubuntu-4";)
+alert ip any any -> 221.163.205.3 any (msg:"Access to boanlab.com"; content:"boanlab";)
+
+# (ubuntu-test-X) -> ping 172.18.0.4
+# curl boanlab.com
+
+# TCP rule
+
+alert tcp any any -> 220.69.176.17 any (msg:"Access to dankook.ac.kr";)
+
+# curl dankook.ac.kr
+
+# HTTP rule
+
+alert http any any -> any 80 (msg:"HTTP access to Google"; method:"GET"; regex:"google.(com|co.kr)";)
+alert http any any -> 211.250.159.103 443 (msg:"Access to git.boanlab.com"; content:"redirected";)
+
+# curl google.com
+# curl google.co.kr
+# curl https://git.boanlab.com -> content is encrypted; thus, cannot match 'redirected'...
+
+# UDP rule
+
+alert udp any any -> 168.126.63.1 53 (msg:"DNS Request for Google"; content:"google";)
+alert udp 168.126.63.2 53 -> any any (msg:"DNS reply for Yahoo"; content:"yahoo";)
+
+# nslookup google.com 168.126.63.1
+# nslookup yahoo.co.kr 168.126.63.2
+
+# ICMP rule
+
+alert icmp any 8 -> 8.8.8.8 0 (msg:"ping request to 8.8.8.8"; content:"01234";)
+alert icmp 1.1.1.1 0 -> any 0 (msg:"ping reply from 1.1.1.1";)
+
+# ping 8.8.8.8
+# ping 1.1.1.1

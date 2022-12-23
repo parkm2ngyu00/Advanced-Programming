@@ -1,0 +1,15 @@
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/focal64" # ubuntu 20.04
+
+    config.vm.provider "virtualbox" do |vb|
+        vb.name = "app-12345678"
+        vb.cpus = 2
+        vb.memory = 2048
+    end
+
+    config.vm.hostname = "app-12345678"
+
+    config.vm.provision :shell, :inline => "sudo apt-get update"
+    config.vm.provision :shell, :inline => "sudo apt-get -y install build-essential"
+end
+

@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+    ubuntu-1:
+        image: ubuntu:latest
+        stdin_open: true
+        tty: true
+    ubuntu-2:
+        image: ubuntu:latest
+        stdin_open: true
+        tty: true

@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  test_1:
+    image: kubearmor/ubuntu-w-utils:latest
+    labels:
+      group: "group-1"
+      container: "ubuntu-1"
+    expose:
+    - "5001"
+    - "8000"
+    - "8080"
+
+  test_2:
+    image: kubearmor/ubuntu-w-utils:latest
+    labels:
+      group: "group-1"
+      container: "ubuntu-2"
+    expose:
+    - "5001"
+    - "8000"
+    - "8080"
+
+  test_3:
+    image: kubearmor/ubuntu-w-utils:latest
+    labels:
+      group: "group-1"
+      container: "ubuntu-3"
+    expose:
+    - "5001"
+    - "8000"
+    - "8080"
+
+  test_4:
+    image: kubearmor/ubuntu-w-utils:latest
+    labels:
+      group: "group-2"
+      container: "ubuntu-4"
+    expose:
+    - "5001"
+    - "8000"
+    - "8080"
