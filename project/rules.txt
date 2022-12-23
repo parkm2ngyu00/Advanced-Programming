@@ -1,0 +1,6 @@
+# service:"service name"; resource:"resource name"; message:"message";
+
+service:"md5"; resource:"dku"; message:"someone accessed 'dku' in md5";
+service:"sha1"; resource:"sw"; message:"someone accessed 'sw' in sha1";
+service:"sha256"; resource:"app"; message:"someone accessed 'app' in sha256";
+service:"sha512"; resource:"midterm"; message:"someone accessed 'midterm' in sha512";
