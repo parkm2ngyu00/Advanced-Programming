@@ -4,21 +4,15 @@
 
 struct context_t ctx;
 
-// 구현
-
-void sigint_handler(int singno)
+void sigint_handler(int signo)
 {
 	stop_capturing();
 
-	if (destroy_rules(&ctx) != 0) {
-		printf("[ERROR] Failed to destroy the rules for raw packets\n");
-	}
+	destroy_stats(&ctx);
 
-	if (destroy_stats(&ctx) != 0) {
-		printf("[ERROR] Failed to destroy the stats for raw packets\n");
-	}
+	destroy_rules(&ctx);
 
-	ctx.debug = 0;
+	exit(0);
 }
 
 int main(int argc, char **argv)
@@ -43,9 +37,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	// 구현
-	// add signal handler
-    signal(SIGINT, sigint_handler);
+	signal(SIGINT, sigint_handler);
 
 	if (start_to_capture(&ctx) != 0) {
 		printf("Failed to capture packets\n");

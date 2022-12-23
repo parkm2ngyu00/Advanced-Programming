@@ -1,90 +1,127 @@
 #include "rule.h"
 
+static char *trim_left_space(char *str)
+{
+    char *begin = str;
+    while (*begin != '\0') {
+        if (isspace(*begin)) {
+            begin++;
+        } else {
+            str = begin;
+            break;
+        }
+    }
+    return str;
+}
+
+static char *remove_quotes(char *str)
+{
+    str[strlen(str)-1] = '\0';
+    return str + 1;
+}
+
 int load_rules(struct context_t *ctx)
 {
-    // 구현
-    int cnt = 1;
     char buf[MAX_STRING] = {0};
 
     FILE *fp = fopen(ctx->rule_file, "r");
-
-    printf("Initialized rules\n");
-
     if (fp == NULL) {
-        printf("Failed to open %s\n", ctx->rule_file);
-        printf("Failed to load rules\n");
-        return 0;
+        printf("Failed to open '%s'\n", ctx->rule_file);
+        return -1;
     }
 
     while (fgets(buf, sizeof(buf), fp) != NULL) {
         if (buf[0] == '#')
             continue;
         
-        if(strlen(buf) < 5)
+        if (strlen(buf) < 15)
             continue;
         
         struct rule_t *rule = (struct rule_t *)malloc(sizeof(struct rule_t));
         if (rule == NULL) {
-            printf("[ERROR] Failed to allocate memory\n");
-            continue;
+            printf("Failed to allocate memory\n");
+            return -1;
         }
         memset(rule, 0, sizeof(struct rule_t));
 
-        char option[NUM_OF_RULE_OPTIONS][MAX_STRING] = {{0}};
-        char *ptr;
+        char kv[NUM_OF_RULE_OPTIONS][MAX_STRING] = {{0}};
+
         int idx;
+        char *ptr;
+
         for (ptr = strtok(buf, ";"), idx = 0; ptr != NULL; ptr = strtok(NULL, ";"), idx = idx + 1) {
-            strcpy(option[idx], ptr);
+            strcpy(kv[idx], ptr);
         }
-        for (idx = 0; idx < NUM_OF_RULE_OPTIONS; idx++) {
-            if (option[idx][0] == 0)
+
+        for (idx=0; idx<NUM_OF_RULE_OPTIONS; idx++) {
+            if (kv[idx][0] == 0)
                 break;
-            ptr = strtok(option[idx], ":");
-            if (strcmp(ptr, "sevice") == 0) {
+
+            ptr = strtok(kv[idx], ":");
+
+            if (strcmp(trim_left_space(ptr), "service") == 0) {
                 ptr = strtok(NULL, ":");
-                strcpy(rule->service, ptr);
-            } else if (strcmp(ptr, "resource") == 0) {
+                strcpy(rule->service, remove_quotes(ptr));
+
+                if (strcmp(rule->service, "md5") != 0 && 
+                    strcmp(rule->service, "sha1") != 0 && 
+                    strcmp(rule->service, "sha256") != 0 && 
+                    strcmp(rule->service, "sha512") != 0) {
+                    printf("Failed to parse a value (%s)\n", rule->service);
+                    return -1;
+                }
+            } else if (strcmp(trim_left_space(ptr), "resource") == 0) {
                 ptr = strtok(NULL, ":");
-                strcpy(rule->resource, ptr);
-            } else if (strcmp(ptr, "message") == 0) {
+                strcpy(rule->resource, remove_quotes(ptr));
+            } else if (strcmp(trim_left_space(ptr), "message") == 0) {
                 ptr = strtok(NULL, ":");
-                strcpy(rule->message, ptr);
+                strcpy(rule->message, remove_quotes(ptr));
+            } else {
+                printf("Failed to load a rule (%s)\n", buf);
+                return -1;
             }
         }
-        
+
+        rule->next = ctx->rules;
+        ctx->rules = rule;
     }
 
     fclose(fp);
 
-    struct rule_t *rule = ctx->rules;
-    while (rule != NULL) {
-        printf("service : %s, resource : %s, message : %s", rule->service, rule->resource, rule->message);
-        rule = rule->next;
+    int cnt;
+    struct rule_t *rule;
+
+    for (rule = ctx->rules, cnt = 0; rule != NULL; rule = rule->next, cnt = cnt + 1) {
+        printf("Rule #%02d\n", cnt + 1);
+        printf("  service: %s\n", rule->service);
+        printf("  resource: %s\n", rule->resource);
+        printf("  message: %s\n", rule->message);
     }
+
+    printf("%d rules are loaded\n", cnt-1);
 
     return 0;
 }
 
 int init_rules(struct context_t *ctx)
 {
-    // 구현
-    ctx->rules = (struct rule_t *)malloc(sizeof(struct rule_t));
-    memset(ctx->rules, 0, sizeof(struct rule_t));
+    ctx->rules = NULL;
 
-    printf("[INFO] Initialized rule tables\n");
+    printf("Initialized rules\n");
+
     return 0;
 }
 
 int destroy_rules(struct context_t *ctx)
 {
-    // 구현
-    int i;
     struct rule_t *rule = ctx->rules;
-
     while (rule != NULL) {
         struct rule_t *temp = rule;
-        rule = rule -> next;
+        rule = rule->next;
         free(temp);
     }
+
+    printf("Destroyed the rules\n");
+
     return 0;
 }
