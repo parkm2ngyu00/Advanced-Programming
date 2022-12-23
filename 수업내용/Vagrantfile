@@ -1,0 +1,27 @@
+Vagrant.configure("2") do |config|
+  if Vagrant.has_plugin? ("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end
+
+  config.vm.box = "ubuntu/focal64" # ubuntu 20.04
+
+  config.vm.provider "virtualbox" do |vb|
+      vb.name = "vagrant-env"
+      vb.cpus = 2
+      vb.memory = 2048
+  end
+
+  config.vm.hostname = "vagrant-env"
+
+  config.vm.synced_folder "./lecture", "/home/vagrant/lecture", owner:"vagrant", group:"vagrant"
+  config.vm.synced_folder "./practice", "/home/vagrant/practice", owner:"vagrant", group:"vagrant"
+  config.vm.synced_folder "./problems", "/home/vagrant/problems", owner:"vagrant", group:"vagrant"
+  config.vm.synced_folder "./setup", "/home/vagrant/setup", owner:"vagrant", group:"vagrant"
+
+  config.vm.provision :shell, :inline => "find /home/vagrant/lecture/ -type f -name '*.c' -or -name '*.sh' | xargs -I{} sed -i 's/\r//g' {}"
+  config.vm.provision :shell, :inline => "find /home/vagrant/practice/ -type f -name '*.c' -or -name '*.sh' | xargs -I{} sed -i 's/\r//g' {}"
+  config.vm.provision :shell, :inline => "find /home/vagrant/problems/ -type f -name '*.c' -or -name '*.sh' | xargs -I{} sed -i 's/\r//g' {}"
+
+  config.vm.provision :shell, :inline => "sed -i 's/\r//g' /home/vagrant/setup/install-deps.sh"
+  config.vm.provision :shell, :inline => "/home/vagrant/setup/install-deps.sh"
+end
